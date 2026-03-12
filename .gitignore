@@ -1,0 +1,22 @@
+# .gitignore baseado no padrão oficial para projetos Python do GitHub, com personalizações específicas para o fluxo de desenvolvimento do sistema.
+
+# (https://github.com/github/gitignore/blob/main/Python.gitignore)
+# --- Ambiente Python ---
+venv/
+env/
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- IDEs e Editores ---
+.vscode/
+.idea/
+
+# --- Banco de Dados e Logs ---
+*.sqlite3
+*.db
+*.log
+
+# --- Flet / Geral ---
+.flet/

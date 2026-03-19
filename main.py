@@ -1,50 +1,59 @@
-class Register:
-  def __init__(self, name, password):
-    self.name = name
-    self.password = password
+# import psycopg2
 
-class Login:
-  def __init__(self, name, password):
+class User: # Define como o User deve ser
+  def __init__(self, name, login, password, role):
     self.name = name
+    self.login = login
     self.password = password
-    
+    self.role = role
 
-managers = []  
+managers = []  # Lista que funciona temporariamente como DB
  
-  
-def main(): 
+def Register(): # Funçao para criar o cadastro
+  print("---CADASTRO INICIAL---")
+  name = input("Digite aqui seu nome")
+  login = input("Digite aqui seu login")
+  password = input("Digite aqui seu pass")
+  role = input("Digite aqui sua função")
 
-  print("----CADASTRO-----")
-  nameCad = input("Nome do Gerente> ")
-  passwordCad = input("Defina sua senha> ")
+   
+  newUser = User(name,login,password,role) # Cria um objeto no molde do da CLASS USER
+  managers.append(newUser) # Guarda o objeto criado na lista que serve como DB
 
-  newManager = Register(nameCad, passwordCad)
-  managers.append(newManager)
-
-
+def Login():
   print("----LOGIN---")
   nameLogin = input("Digite seu Login> ")
   passwordLogin = input("Digite sua senha> ")
+  return nameLogin, passwordLogin # Esse Return serve para a informação de login não ser perdida
 
-  tryLogin = Login(nameLogin,passwordLogin)
 
-  loggedIn = False  
-  for g in managers:
-      if tryLogin.name == g.name and tryLogin.password == g.password:
-       loggedIn = True
-       break
-
-  if loggedIn:
-     print("VOCE LOGOU COM SUCESSO")
-
-     input("Digite 1 para criar checklists, Digite 2 para conferir")
-  else:
-    print("ESSE GERENTE NAO EXISTE")
- 
+def UserLogin(loginAttempt,password_attempt):
   
+  # Procura na lista para achar se o que foi digitado está certo
+  for user in managers:
+        if user.login == loginAttempt and user.password == password_attempt:
+            return user  # Se existe na lista, retorna os valores para o UserLogged() na função main().
+  return None 
+
+
+  
+def main(): 
+  Register()
+
+
+  login, password = Login() # Aqui você recebe as informações do return da função LOGIN() e guarda nas variaveis locais: login e password
+
+  # Aqui envia o login e password para a função UserLogin() para conferir e retornar.
+  UserLogged = UserLogin(login,password)
+
+  if UserLogged: 
+     print("Voce logou") # Caso o valor retornado exista
+  else:
+    print("\n❌ Usuário ou senha incorretos.") # Caso o valor retornado não exista
+
 
 if __name__ == "__main__":
-  main()
+    main()
 
 
 

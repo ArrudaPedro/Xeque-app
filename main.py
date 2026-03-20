@@ -1,59 +1,86 @@
-# import psycopg2
+import psycopg2
 
-class User: # Define como o User deve ser
+# Conecta em um Banco de Dados existente.
+connect = psycopg2.connect(
+   dbname="XXXX",
+   user="XXXXX",
+   password="XXXXXX",
+   host="XXXX",
+   ) 
+
+cursor = connect.cursor() # Cria um cursor para controlar as operações do Banco de Dados.
+
+# Define como o User deve ser.
+class User: 
   def __init__(self, name, login, password, role):
     self.name = name
     self.login = login
     self.password = password
     self.role = role
 
-managers = []  # Lista que funciona temporariamente como DB
- 
-def Register(): # Funçao para criar o cadastro
-  print("---CADASTRO INICIAL---")
-  name = input("Digite aqui seu nome")
-  login = input("Digite aqui seu login")
-  password = input("Digite aqui seu pass")
-  role = input("Digite aqui sua função")
+# Funçao para criar o cadastro. 
+def Register(): 
 
-   
-  newUser = User(name,login,password,role) # Cria um objeto no molde do da CLASS USER
-  managers.append(newUser) # Guarda o objeto criado na lista que serve como DB
+  print("---CADASTRO INICIAL---")
+  name = input("Digite aqui o nome a ser usado: ")
+  login = input("Digite aqui o login desejado: ")
+  password = input("Digite aqui a senha desejada: ")
+  role = input("Digite aqui a função desejada")
+
+  query = "INSERT INTO managers (name, login, password, role) VALUES (%s,%s,%s,%s)"
+  newUser = (name, login, password, role)
+
+  try:
+      cursor.execute(query,newUser) # Preenche os VALUES do query com os dados do newUser
+      connect.commit() # Grava as informações no Banco de Dados
+      print("Registrado com sucesso!")
+  except Exception as msgError: # Se algo no try der errado:
+     connect.rollback() # Evita que o sistema trave 
+     print(f"Erro ao registrar. Erro: {msgError}")
+     
+
 
 def Login():
   print("----LOGIN---")
   nameLogin = input("Digite seu Login> ")
   passwordLogin = input("Digite sua senha> ")
-  return nameLogin, passwordLogin # Esse Return serve para a informação de login não ser perdida
 
+  # Consulta o banco
+  query = "SELECT name, login, password, role FROM managers WHERE login = %s AND password = %s"
 
-def UserLogin(loginAttempt,password_attempt):
-  
-  # Procura na lista para achar se o que foi digitado está certo
-  for user in managers:
-        if user.login == loginAttempt and user.password == password_attempt:
-            return user  # Se existe na lista, retorna os valores para o UserLogged() na função main().
-  return None 
+  try:
+    
+    cursor.execute(query,(nameLogin,passwordLogin)) # Preenche os VALUES do query com os dados do login e password
 
+    # Pega um resultado (1 Linha ou none)
+    user_data = cursor.fetchone()
+    
+    if user_data:
+       loggedUser = User(user_data[0], user_data[1], user_data[2], user_data[3])
+       print(f"Bem vinda(a), {loggedUser.name}! Nivel de acesso {loggedUser.role}")
+       return loggedUser
+    else:
+       return None
 
-  
+  except Exception as msgError:
+      connect.rollback() # Evita que o sistema trave 
+      print(f"Erro ao logar. Erro{msgError}")
+     
 def main(): 
+  # Roda a função register
   Register()
 
+  # Roda a função login
+  Login()
+    
+  # Fecha as conexões com o Banco de Dados.
+  cursor.close()
+  connect.close()
+  print("Conexão com Banco de Dados Encerrada")
 
-  login, password = Login() # Aqui você recebe as informações do return da função LOGIN() e guarda nas variaveis locais: login e password
-
-  # Aqui envia o login e password para a função UserLogin() para conferir e retornar.
-  UserLogged = UserLogin(login,password)
-
-  if UserLogged: 
-     print("Voce logou") # Caso o valor retornado exista
-  else:
-    print("\n❌ Usuário ou senha incorretos.") # Caso o valor retornado não exista
 
 
 if __name__ == "__main__":
     main()
-
 
 
